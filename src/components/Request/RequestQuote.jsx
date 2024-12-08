@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTruck,
@@ -6,13 +7,20 @@ import {
   faBus,
   faShip,
 } from "@fortawesome/free-solid-svg-icons";
-import FullTruckloadForm from "./FullTruckloadForm"; // Import FullTruckloadForm
+import FullTruckLoadForm from "./FullTruckloadForm"; // Import the new component
 
 function RequestQuoteApp() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFullTruckloadModalOpen, setIsFullTruckloadModalOpen] =
-    useState(false); // Track full truckload modal
-  const [setSelectedQuoteType] = useState(""); // Correct state initialization
+  const [selectedQuoteType, setSelectedQuoteType] = useState("");
+  const navigate = useNavigate(); // Hook to navigate to other routes
+
+  const handleQuoteSelection = (type) => {
+    setSelectedQuoteType(type);
+    if (type === "FULL_TRUCKLOAD") {
+      navigate("/full-truckload-form"); // Navigate to the FullTruckLoadForm component
+    }
+    // You can add other conditions for other quote types if needed
+  };
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -20,40 +28,31 @@ function RequestQuoteApp() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedQuoteType(""); // Reset selected quote type when modal is closed
-  };
-
-  const handleFullTruckloadModalOpen = () => {
-    setIsFullTruckloadModalOpen(true); // Open the full truckload modal
-  };
-
-  const handleFullTruckloadModalClose = () => {
-    setIsFullTruckloadModalOpen(false); // Close the full truckload modal
+    setSelectedQuoteType("");
   };
 
   return (
     <div style={styles.appContainer}>
-      {/* Main Button to Open Request a Quote Modal */}
       <button style={styles.requestButton} onClick={handleOpenModal}>
         REQUEST A QUOTE
       </button>
 
-      {/* Request Quote Modal */}
       {isModalOpen && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContainer}>
-            {/* Close Button */}
+        <div style={styles.modalOverlay} onClick={handleCloseModal}>
+          <div
+            style={styles.modalContainer}
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal on content click
+          >
             <div style={styles.closeButton} onClick={handleCloseModal}>
               ✖
             </div>
 
             <h2 style={styles.header}>REQUEST A QUOTE</h2>
 
-            {/* Quote Options */}
             <div style={styles.buttonContainer}>
               <button
                 style={styles.button}
-                onClick={handleFullTruckloadModalOpen} // Open the full truckload form modal
+                onClick={() => handleQuoteSelection("FULL_TRUCKLOAD")}
               >
                 <FontAwesomeIcon icon={faTruck} style={styles.icon} /> FULL
                 TRUCKLOAD
@@ -61,44 +60,26 @@ function RequestQuoteApp() {
 
               <button
                 style={styles.button}
-                // onClick={() => handleButtonClick("LESS THAN TRUCKLOAD")}
+                onClick={() => handleQuoteSelection("LESS_THAN_TRUCKLOAD")}
               >
-                <FontAwesomeIcon icon={faTruckLoading} style={styles.icon} />{" "}
+                <FontAwesomeIcon icon={faTruckLoading} style={styles.icon} />
                 LESS THAN TRUCKLOAD
               </button>
 
               <button
                 style={styles.button}
-                // onClick={() => handleButtonClick("INTERMODAL")}
+                onClick={() => handleQuoteSelection("INTERMODAL")}
               >
                 <FontAwesomeIcon icon={faBus} style={styles.icon} /> INTERMODAL
               </button>
 
               <button
                 style={styles.button}
-                // onClick={() => handleButtonClick("DRAYAGE")}
+                onClick={() => handleQuoteSelection("DRAYAGE")}
               >
                 <FontAwesomeIcon icon={faShip} style={styles.icon} /> DRAYAGE
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Full Truckload Form Modal */}
-      {isFullTruckloadModalOpen && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContainer}>
-            {/* Close Button */}
-            <div
-              style={styles.closeButton}
-              onClick={handleFullTruckloadModalClose}
-            >
-              ✖
-            </div>
-
-            {/* Full Truckload Form */}
-            <FullTruckloadForm />
           </div>
         </div>
       )}
@@ -114,8 +95,8 @@ const styles = {
   requestButton: {
     padding: "15px 30px",
     fontSize: "16px",
-    backgroundColor: "#000", // Black button background
-    color: "#fff", // White text
+    backgroundColor: "#000",
+    color: "#fff",
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
@@ -127,7 +108,7 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.7)", // Semi-transparent black overlay
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -136,24 +117,22 @@ const styles = {
     width: "400px",
     padding: "40px",
     borderRadius: "15px",
-    backgroundColor: "#fff", // White modal background
+    backgroundColor: "#fff",
     position: "relative",
     textAlign: "center",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
   },
   closeButton: {
     position: "absolute",
-    top: "55px",
-    right: "50px",
-    fontSize: "28px",
+    top: "10px",
+    right: "10px",
+    fontSize: "20px",
     cursor: "pointer",
-    color: "#000", // Black close button
   },
   header: {
     fontSize: "20px",
     fontWeight: "bold",
     marginBottom: "20px",
-    color: "#000", // Black text
   },
   buttonContainer: {
     display: "flex",
@@ -161,25 +140,32 @@ const styles = {
     gap: "15px",
   },
   button: {
-    padding: "10px 20px", // Adjust padding for better alignment
+    padding: "10px 20px",
     fontSize: "16px",
-    border: "1px solid #000", // Black border
+    border: "1px solid #000",
     borderRadius: "5px",
-    backgroundColor: "#fff", // White background
+    backgroundColor: "#fff",
     cursor: "pointer",
-    color: "#000", // Black text
     display: "flex",
     alignItems: "center",
-    justifyContent: "flex-start", // Align icon and text inline left
-    gap: "10px", // Space between icon and text
-    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+    justifyContent: "flex-start",
+    gap: "10px",
     transition: "background-color 0.3s ease",
   },
-
   icon: {
-    fontSize: "30px", // Font Awesome icon size
-    color: "#000", // Black icon
+    fontSize: "24px",
   },
 };
 
-export default RequestQuoteApp;
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<RequestQuoteApp />} />
+        <Route path="/full-truckload-form" element={<FullTruckLoadForm />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

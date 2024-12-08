@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { FaArrowLeft, FaCheck, FaMinus, FaPlus, FaCalendarAlt, FaClock } from "react-icons/fa";
+import { FaArrowLeft, FaCheck, FaMinus, FaPlus, FaTimes } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom'; // React Router hook
 
 function FullTruckloadForm() {
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -16,7 +16,6 @@ function FullTruckloadForm() {
     OriginZipCode: "",
     OriginPickupDate: "",
     OriginPickupTime: "",
-
     DestZone: "",
     DestProvince: "",
     DestCity: "",
@@ -28,10 +27,18 @@ function FullTruckloadForm() {
     Comment: "",
   });
 
+  const navigate = useNavigate(); // Initialize navigate function
+
+  const goToRequestQuote = () => {
+    navigate('/'); // Adjust the path as per your routing setup
+  };
+
   const [currentStep, setCurrentStep] = useState(1);
   const [focusedInput, setFocusedInput] = useState("");
-
   const [openAccordion, setOpenAccordion] = useState("personalDetails");
+  const [isTermsChecked, setIsTermsChecked] = useState(false); // Initialize the checkbox state
+  const [error, setError] = useState(""); // Error message state
+
 
   const toggleAccordion = (accordionId) => {
     setOpenAccordion(openAccordion === accordionId ? null : accordionId);
@@ -68,7 +75,7 @@ function FullTruckloadForm() {
     focusedInput === inputName ||
     (formData[inputName] && formData[inputName].length > 0);
 
-  const renderInput = (name, type = "text", label) => (
+  const renderInput = (name, type = "text", label, icon = null) => (
     <div style={styles.inputGroup}>
       <label
         style={{
@@ -78,35 +85,22 @@ function FullTruckloadForm() {
       >
         {label}
       </label>
-      <input
-        type={type}
-        name={name}
-        style={styles.input}
-        value={formData[name] || ""}
-        onFocus={() => handleFocus(name)}
-        onBlur={handleBlur}
-        onChange={handleInputChange}
-      />
+      <div style={styles.inputWithIcon}>
+        {icon && <div style={styles.icon}>{icon}</div>}
+        <input
+          type={type}
+          name={name}
+          style={styles.input}
+          value={formData[name] || ""}
+          onFocus={() => handleFocus(name)}
+          onBlur={handleBlur}
+          onChange={handleInputChange}
+        />
+      </div>
     </div>
   );
 
-  // const renderInputWithIcon = (name, type, label, icon) => (
-  //   <div style={styles.inputGroupWithIcon}>
-  //     <label style={styles.inputLabel}>{label}</label>
-  //     <div style={styles.inputIconContainer}>
-  //       <div style={styles.icon}>{icon}</div>
-  //       <input
-  //         type={type}
-  //         name={name}
-  //         style={styles.inputWithoutBorder}
-  //         value={formData[name] || ""}
-  //         onFocus={() => handleFocus(name)}
-  //         onBlur={handleBlur}
-  //         onChange={handleInputChange}
-  //       />
-  //     </div>
-  //   </div>
-  // );
+
 
   return (
     <div style={styles.formContainer}>
@@ -115,6 +109,9 @@ function FullTruckloadForm() {
           <FaArrowLeft />
         </button>
         <h1 style={styles.headerTitleStyle}>FULL TRUCKLOAD</h1>
+        <button style={styles.backButtonStyle} onClick={goToRequestQuote}>
+          <FaTimes />
+        </button>
       </div>
 
       <div style={styles.progressContainer}>
@@ -174,15 +171,14 @@ function FullTruckloadForm() {
             </button>
           </>
         )}
-
         {currentStep === 2 && (
           <>
             {renderInput("OriginZone", "text", "Zone")}
             {renderInput("OriginProvince", "text", "Province/State")}
             {renderInput("OriginCity", "text", "City")}
             {renderInput("OriginZipCode", "text", "ZIP Code")}
-            {renderInput("", "date", "Pickup Date", <FaCalendarAlt />)}
-            {renderInput("", "time", "Pickup Time", <FaClock />)}
+            {renderInput("", "date", "Pickup Date")}
+            {renderInput("", "time", "Pickup Time")}
             <div style={styles.buttonsContainer}>
               <button
                 type="button"
@@ -201,15 +197,14 @@ function FullTruckloadForm() {
             </div>
           </>
         )}
-
         {currentStep === 3 && (
           <>
             {renderInput("DestZone", "text", "Zone")}
             {renderInput("DestProvince", "text", "Province/State")}
             {renderInput("DestCity", "text", "City")}
             {renderInput("DestZipCode", "text", "ZIP Code")}
-            {renderInput("", "Date", "Pickup Date", <FaCalendarAlt />)}
-            {renderInput("", "Time", "Pickup Time", <FaClock />)}
+            {renderInput("", "date", "Delivered Date")}
+            {renderInput("", "time", "Delivered Time")}
             <div style={styles.buttonsContainer}>
               <button
                 type="button"
@@ -229,30 +224,161 @@ function FullTruckloadForm() {
           </>
         )}
 
-        {/* Shipping Details */}
         {currentStep === 4 && (
           <>
-            {renderInput("Equipment", "text", "Equipment")}
-            {renderInput("TrailerSize", "text", "Trailer Size")}
+            {/* Equipment Dropdown */}
             <div style={styles.inputGroup}>
               <label
                 style={{
                   ...styles.inputLabel,
-                  ...(isLabelFocused("Comment") ? styles.labelFocused : {}),
+                  ...(isLabelFocused("Equipment") ? styles.labelFocused : {}),
                 }}
               >
-                Comment
               </label>
-              <textarea
-                name="Comment"
-                style={styles.textarea}
-                value={formData["Comment"] || ""}
-                onFocus={() => handleFocus("Comment")}
+              <select
+                name="Equipment"
+                value={formData.Equipment}
+                onFocus={() => handleFocus("Equipment")}
                 onBlur={handleBlur}
                 onChange={handleInputChange}
-              />
+                style={styles.dropdown}
+              >
+                <option value="" disabled>
+                  Select Equipment
+                </option>
+                <option value="Dry Van">Dry Van</option>
+                <option value="Flatbed">Flatbed</option>
+                <option value="Temperature Controlled">Temperature Controlled</option>
+              </select>
             </div>
 
+{/* Conditional Fields for Dry Van */}
+{formData.Equipment === "Dry Van" && (
+  <>
+    <div style={styles.inputGroup}>
+      <label style={styles.inputLabel}></label>
+      <div style={styles.radioGroup}>
+        <label style={styles.radioOption}>
+          <input
+            type="radio"
+            name="Country"
+            value="United States"
+            checked={formData.Country === "United States"}
+            onChange={handleInputChange}
+          />
+          <span role="img" aria-label="US Flag">
+            🇺🇸
+          </span>{" "}
+          I'm shipping from the United States
+        </label>
+        <label style={styles.radioOption}>
+          <input
+            type="radio"
+            name="Country"
+            value="Canada"
+            checked={formData.Country === "Canada"}
+            onChange={handleInputChange}
+          />
+          <span role="img" aria-label="Canada Flag">
+            🇨🇦
+          </span>{" "}
+          I'm shipping from Canada
+        </label>
+      </div>
+    </div>
+
+    {/* City and Postal Code Section */}
+    <div style={styles.inputGroup}>
+      <label style={styles.inputLabel}></label>
+      <textarea
+        name="CityPostalCode"
+        placeholder="Enter city and postal code"
+        value={formData.CityPostalCode || ""}
+        onChange={handleInputChange}
+        style={styles.textarea}
+      ></textarea>
+    </div>
+
+    {/* Info Box */}
+    <div style={styles.infoBox}>
+      <span role="img" aria-label="Info Icon">
+        🏢
+      </span>{" "}
+      Truckload pickup location must be a business with a loading dock or
+      have a way to load the truck without a liftgate.
+    </div>
+  </>
+)}
+
+
+            {/* Other Conditional Fields */}
+            {formData.Equipment === "Flatbed" && (
+              <div style={styles.inputGroup}>
+                <label
+                  style={{
+                    ...styles.inputLabel,
+                    ...(isLabelFocused("Tarps") ? styles.labelFocused : {}),
+                  }}
+                >
+                </label>
+                <select
+                  name="Tarps"
+                  value={formData.Tarps || ""}
+                  onFocus={() => handleFocus("Tarps")}
+                  onBlur={handleBlur}
+                  onChange={handleInputChange}
+                  style={styles.dropdown}
+                >
+                  <option value="" disabled>
+                    Select Tarps
+                  </option>
+                  <option value="No Tarp Required">No Tarp Required</option>
+                  <option value="4 ft">4 ft</option>
+                  <option value="6 ft">6 ft</option>
+                  <option value="8 ft">8 ft</option>
+                </select>
+              </div>
+            )}
+
+            {formData.Equipment === "Temperature Controlled" && (
+              <div style={styles.temperatureContainer}>
+                <div style={styles.inputWithUnit}>
+                  <label style={styles.tempLabel}>Minimum temperature *</label>
+                  <div style={styles.inputWithIcon}>
+                    <input
+                      type="number"
+                      name="MinTemp"
+                      placeholder="Min Temp"
+                      value={formData.MinTemp || ""}
+                      onChange={handleInputChange}
+                      style={styles.input}
+                    />
+                    <span style={styles.unit}>°F</span>
+                  </div>
+                </div>
+
+                <div style={styles.inputWithUnit}>
+                  <label style={styles.tempLabel}>Maximum temperature *</label>
+                  <div style={styles.inputWithIcon}>
+                    <input
+                      type="number"
+                      name="MaxTemp"
+                      placeholder="Max Temp"
+                      value={formData.MaxTemp || ""}
+                      onChange={handleInputChange}
+                      style={styles.input}
+                    />
+                    <span style={styles.unit}>°F</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Trailer Size and Comment Inputs */}
+            {/* {renderInput("TrailerSize", "text", "Trailer Size")}
+            {renderInput("Comment", "text", "Comment")} */}
+
+            {/* Navigation Buttons */}
             <div style={styles.buttonsContainer}>
               <button
                 type="button"
@@ -272,7 +398,7 @@ function FullTruckloadForm() {
           </>
         )}
 
-        {/* Preview Section */}
+
         {currentStep === 5 && (
           <>
             <div style={styles.accordion}>
@@ -451,28 +577,61 @@ function FullTruckloadForm() {
                     </div>
                     <div style={styles.inputGroupDetails}>
                       <label style={styles.label}>Trailer Size</label>
-                      <span style={styles.value}>
-                        {formData.TrailerSize}
-                      </span>
+                      <span style={styles.value}>{formData.TrailerSize}</span>
                     </div>
                     <div style={styles.inputGroupDetails}>
                       <label style={styles.label}>Comment</label>
-                      <span style={styles.value}>
-                        {formData.Comment}
-                      </span>
+                      <span style={styles.value}>{formData.Comment}</span>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Terms and Conditions Checkbox */}
+            <div style={styles.termsCheckboxContainer}>
+              <input
+                type="checkbox"
+                id="terms"
+                checked={isTermsChecked}
+                onChange={() => setIsTermsChecked(!isTermsChecked)} // Toggle checkbox state
+              />
+              <label htmlFor="terms" style={styles.termsLabel}>
+                I agree to the Terms and Conditions
+              </label>
+            </div>
+
+            {/* Error Message */}
+            {error && <p style={styles.errorMessage}>{error}</p>}
+
+            {/* Confirm Button */}
             <button
               type="button"
-              style={styles.button}
-              onClick={() => alert("Form Submitted!")}
+              style={{
+                ...styles.button1,
+                ...(isTermsChecked ? {} : styles.button1Disabled), // Apply disabled style when not checked
+              }}
+              onMouseEnter={() => {
+                if (!isTermsChecked) {
+                  document.body.style.cursor = "not-allowed";
+                }
+              }}
+              onMouseLeave={() => {
+                document.body.style.cursor = "default";
+              }}
+              onClick={() => {
+                if (!isTermsChecked) {
+                  setError("You must agree to the terms and conditions to proceed.");
+                } else {
+                  setError(""); // Clear error message
+                  alert("Form Submitted!"); // Form submission logic
+                }
+              }}
+              disabled={!isTermsChecked} // Disable if terms are not checked
             >
-              Confirm <FaCheck />
+              Submit
             </button>
+
           </>
         )}
       </form>
@@ -486,12 +645,16 @@ const styles = {
     backgroundColor: "#fff",
     color: "#000",
     maxWidth: "500px",
+    height: "calc(100vh - 20px)", // Adjust for padding
     margin: "0 auto",
+    overflow: "hidden", // Prevent scrolling
+    boxSizing: "border-box", // Ensure padding is included in the height calculation
   },
+
   formHeaderStyle: {
     display: "flex",
     alignItems: "center",
-    marginBottom: "10px",
+    marginBottom: "30px",
   },
   backButtonStyle: {
     background: "none",
@@ -549,6 +712,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   },
+
   inputGroup: {
     marginBottom: "20px",
     position: "relative",
@@ -613,11 +777,7 @@ const styles = {
     borderRadius: "5px",
     padding: "10px",
   },
-  icon: {
-    marginRight: "10px",
-    fontSize: "16px",
-    color: "#888",
-  },
+
   inputWithoutBorder: {
     flex: 1,
     border: "none",
@@ -626,62 +786,149 @@ const styles = {
     fontSize: "16px",
   },
 
-  accordion: {
-    marginBottom: "20px",
-  },
-  accordionItem: {
-    display: "flex",
+  dropdown: {
+    width: "95.5%",
+    padding: "12px",
     borderRadius: "5px",
-    flexDirection: "column",
+    border: "1px solid #ccc",
+    fontSize: "16px",
+    backgroundColor: "#fff",
   },
 
-  accordionHeader: {
-    borderRadius: "5px",
+  temperatureContainer: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#d2d2d2",
-    padding: "10px",
-    marginBottom: "1px",
-    cursor: "pointer",
-    position: "sticky",
-    top: "0", // Fix the header on top of the accordion
-    zIndex: 10, // Ensure it's above the content
+    marginBottom: "20px",
   },
 
-  accordionContent: {
+  inputWithUnit: {
     display: "flex",
-    flexDirection: "column", // Stacks items vertically
-    padding: "10px",
-    border: "2px solid #000",
-    borderRadius: "5px",
-    backgroundColor: "#fff",
-    marginBottom: "3px",
+    flexDirection: "column",
+    flex: 1,
+    marginRight: "10px",
   },
 
-  inputGroupDetails: {
-    display: "flex", // Aligns label and input in the same line
-    justifyContent: "space-between", // Space between label and value
-    alignItems: "center", // Vertically centers the items
+  tempLabel: {
+    fontSize: "14px",
+    fontWeight: "bold",
     marginBottom: "5px",
   },
 
-  label: {
-    flex: "1", // Label takes up 1 part of the space
-    textAlign: "left", // Align label text to the left
-    paddingRight: "10px", // Space between label and value
+  unit: {
+    marginLeft: "5px",
+    alignSelf: "center",
+    fontSize: "16px",
+    color: "#555",
+  },
+
+  inputWithIcon: {
+    display: "flex",
+  },
+  radioGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  radioOption: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    fontSize: "16px",
+  },
+  textarea: {
+    width: "90%",
+    height: "80px",
+    padding: "12px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    fontSize: "16px",
+  },
+  infoBox: {
+    marginTop: "2px",
+    marginBottom: "15px",
+    fontSize: "16px",
+    color: "black",
+  },
+  
+  accordion: {
+    marginTop: "10px",
+  },
+  accordionItem: {
+    marginBottom: "10px",
+  },
+  accordionHeader: {
+    backgroundColor: "#f1f1f1",
+    padding: "10px",
+    width: "100%",
+    border: "1px solid #000",
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: "16px", // Optional: Add font size for the text
+    fontWeight: "bold", // Optional: Add font weight for emphasis
+    borderRadius: "5px", // Optional: Rounded corners for a cleaner look
+  },
+
+  accordionContent: {
+    padding: "10px",
+    border: "1px solid #000",
+    backgroundColor: "#f9f9f9",
+    marginTop: "10px", // Add margin for spacing between sections
+    borderRadius: "5px", // Optional: Rounded corners
+  },
+
+  inputGroupDetails: {
+    marginBottom: "10px", // Adds space between each input group
+    fontSize: "14px", // Optional: Adds font size for better readability
+  },
+
+  icon: {
+    marginRight: "10px",
+    fontSize: "16px",
+    color: "#000",
   },
 
   value: {
-    flex: "2", // Value takes up the remaining space
-    textAlign: "left", // Align value to the left
+    fontSize: "14px",
+    color: "#555", // Slightly muted color for values
   },
 
-  // icon: {
-  //   fontSize: "18px",
-  // },
+  termsCheckboxContainer: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "0px", // Adds space between the checkbox and button
+  },
 
+  termsLabel: {
+    fontSize: "14px",
+    marginLeft: "8px", // Adds space between checkbox and label
+    color: "#333", // Optional: Slightly darker color for better readability
+  },
 
+  errorMessage: {
+    color: "red",
+    fontSize: "14px",
+    marginTop: "10px",
+    fontWeight: "bold", // Optional: Make the error message bold
+  },
+
+  button1: {
+    padding: "10px 20px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "16px",
+    borderRadius: "5px",
+    marginTop: "20px", // Adds space between button and other elements
+    transition: "background-color 0.3s", // Optional: Smooth transition on hover
+  },
+
+  button1Disabled: {
+    backgroundColor: "#d3d3d3", // Greyed out when disabled
+    cursor: "not-allowed", // Shows disabled cursor
+  },
 };
 
 export default FullTruckloadForm;
