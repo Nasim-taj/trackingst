@@ -1,0 +1,7 @@
+[
+  { "city": "New York", "postalCode": "10001" },
+  { "city": "Los Angeles", "postalCode": "90001" },
+  { "city": "Chicago", "postalCode": "60601" },
+  { "city": "Houston", "postalCode": "77001" },
+  { "city": "Phoenix", "postalCode": "85001" }
+]
