@@ -34,6 +34,7 @@ function FullTruckloadForm() {
     NumPallets: "",
     items: [], // Items list
     editingIndex: null,
+    editIndex: undefined,
     TrailerSize: "",
     Comment: "",
     CityPostalCode: "",
@@ -328,7 +329,7 @@ function FullTruckloadForm() {
         ))}
       </div>
 
-      <form style={styles.form}>
+      <form onSubmit={(e) => e.preventDefault()}>
         {currentStep === 1 && (
           <>
             {renderInput("firstName", "text", "First Name")}
@@ -1032,7 +1033,7 @@ const styles = {
   },
   inputLabel: {
     position: "absolute",
-    top: "12px",
+    top: "15px",
     left: "12px",
     fontSize: "16px",
     color: "#aaa",
