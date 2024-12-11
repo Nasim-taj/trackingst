@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaArrowLeft, FaCheck, FaMinus, FaPlus, FaTimes } from "react-icons/fa";
-import { useNavigate } from 'react-router-dom'; // React Router hook
+import { useNavigate } from "react-router-dom"; // React Router hook
+import canadaFlag from './../../assets/pngegg.png'
 
 function FullTruckloadForm() {
   const [formData, setFormData] = useState({
@@ -23,14 +24,26 @@ function FullTruckloadForm() {
     DestPickupDate: "",
     DestPickupTime: "",
     Equipment: "",
+    ItemDescription: "",
+    PackagingType: "",
+    ItemCondition: "",
+    Length: "",
+    Width: "",
+    Height: "",
+    Weight: "",
+    NumPallets: "",
+    items: [], // Items list
+    editingIndex: null,
     TrailerSize: "",
     Comment: "",
+    CityPostalCode: "",
   });
 
   const navigate = useNavigate(); // Initialize navigate function
 
+
   const goToRequestQuote = () => {
-    navigate('/'); // Adjust the path as per your routing setup
+    navigate("/"); // Adjust the path as per your routing setup
   };
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -38,7 +51,6 @@ function FullTruckloadForm() {
   const [openAccordion, setOpenAccordion] = useState("personalDetails");
   const [isTermsChecked, setIsTermsChecked] = useState(false); // Initialize the checkbox state
   const [error, setError] = useState(""); // Error message state
-
 
   const toggleAccordion = (accordionId) => {
     setOpenAccordion(openAccordion === accordionId ? null : accordionId);
@@ -100,6 +112,169 @@ function FullTruckloadForm() {
     </div>
   );
 
+  // Hardcoded list of cities and postal codes
+  const citiesAndPostalCodes = [
+    { city: "New York", postalCode: "10001" },
+    { city: "Los Angeles", postalCode: "90001" },
+    { city: "Chicago", postalCode: "60601" },
+    { city: "Houston", postalCode: "77001" },
+    { city: "Phoenix", postalCode: "85001" },
+    { city: "Philadelphia", postalCode: "19102" },
+    { city: "San Antonio", postalCode: "78201" },
+    { city: "San Diego", postalCode: "92101" },
+    // Add more cities and postal codes as needed
+  ];
+
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const handleInputChange2 = (event) => {
+    const { value } = event.target;
+    setFormData({ ...formData, CityPostalCode: value });
+
+    if (value) {
+      const filteredSuggestions = citiesAndPostalCodes.filter(
+        (item) =>
+          item.city.toLowerCase().includes(value.toLowerCase()) ||
+          item.postalCode.startsWith(value)
+      );
+      setSuggestions(filteredSuggestions);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setFormData({
+      ...formData,
+      CityPostalCode: `${suggestion.city}, ${suggestion.postalCode}`,
+    });
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const [editIndex, setEditIndex] = useState(null); // Track the item being edited
+
+  // // Handle input changes
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  // };
+  
+  // Add or Update Item
+  const handleAddAnotherItem = () => {
+    if (editIndex !== null) {
+      // Update the existing item
+      const updatedItems = [...formData.items];
+      updatedItems[editIndex] = {
+        ItemDescription: formData.ItemDescription,
+        PackagingType: formData.PackagingType,
+        ItemCondition: formData.ItemCondition,
+        Length: formData.Length,
+        Width: formData.Width,
+        Height: formData.Height,
+        Weight: formData.Weight,
+        NumPallets: formData.NumPallets,
+      };
+      setFormData((prev) => ({
+        ...prev,
+        items: updatedItems,
+        ItemDescription: "",
+        PackagingType: "",
+        ItemCondition: "",
+        Length: "",
+        Width: "",
+        Height: "",
+        Weight: "",
+        NumPallets: "",
+      }));
+      setEditIndex(null); // Exit edit mode
+    } else {
+      // Add a new item
+      setFormData((prev) => ({
+        ...prev,
+        items: [
+          ...prev.items,
+          {
+            ItemDescription: formData.ItemDescription,
+            PackagingType: formData.PackagingType,
+            ItemCondition: formData.ItemCondition,
+            Length: formData.Length,
+            Width: formData.Width,
+            Height: formData.Height,
+            Weight: formData.Weight,
+            NumPallets: formData.NumPallets,
+          },
+        ],
+        ItemDescription: "",
+        PackagingType: "",
+        ItemCondition: "",
+        Length: "",
+        Width: "",
+        Height: "",
+        Weight: "",
+        NumPallets: "",
+      }));
+    }
+  };
+  
+  // Edit Item
+  const handleEditItem = (index) => {
+    const itemToEdit = formData.items[index];
+    setFormData((prev) => ({
+      ...prev,
+      ItemDescription: itemToEdit.ItemDescription,
+      PackagingType: itemToEdit.PackagingType,
+      ItemCondition: itemToEdit.ItemCondition,
+      Length: itemToEdit.Length,
+      Width: itemToEdit.Width,
+      Height: itemToEdit.Height,
+      Weight: itemToEdit.Weight,
+      NumPallets: itemToEdit.NumPallets,
+    }));
+    setEditIndex(index); // Enter edit mode
+  };
+  
+  // Remove Item
+  const handleRemoveItem = (index) => {
+    const updatedItems = formData.items.filter((_, i) => i !== index);
+    setFormData((prev) => ({ ...prev, items: updatedItems }));
+  };
+
+
+
+  // Remove an item from the list
+
+
+
+  const handleInputChange3 = (e) => {
+    const { name, value } = e.target;
+
+    // Set default dimensions for specific pallet types
+    if (name === "PackagingType") {
+      if (value === "Pallet(48x40)") {
+        setFormData((prev) => ({
+          ...prev,
+          PackagingType: value,
+          Length: 48,
+          Width: 40,
+        }));
+      } else if (value === "Pallet(48x48)") {
+        setFormData((prev) => ({
+          ...prev,
+          PackagingType: value,
+          Length: 48,
+          Width: 48,
+        }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
 
   return (
@@ -233,8 +408,7 @@ function FullTruckloadForm() {
                   ...styles.inputLabel,
                   ...(isLabelFocused("Equipment") ? styles.labelFocused : {}),
                 }}
-              >
-              </label>
+              ></label>
               <select
                 name="Equipment"
                 value={formData.Equipment}
@@ -248,67 +422,206 @@ function FullTruckloadForm() {
                 </option>
                 <option value="Dry Van">Dry Van</option>
                 <option value="Flatbed">Flatbed</option>
-                <option value="Temperature Controlled">Temperature Controlled</option>
+                <option value="Temperature Controlled">
+                  Temperature Controlled
+                </option>
               </select>
             </div>
 
-{/* Conditional Fields for Dry Van */}
-{formData.Equipment === "Dry Van" && (
-  <>
-    <div style={styles.inputGroup}>
-      <label style={styles.inputLabel}></label>
-      <div style={styles.radioGroup}>
-        <label style={styles.radioOption}>
-          <input
-            type="radio"
-            name="Country"
-            value="United States"
-            checked={formData.Country === "United States"}
-            onChange={handleInputChange}
-          />
-          <span role="img" aria-label="US Flag">
-            🇺🇸
-          </span>{" "}
-          I'm shipping from the United States
-        </label>
-        <label style={styles.radioOption}>
-          <input
-            type="radio"
-            name="Country"
-            value="Canada"
-            checked={formData.Country === "Canada"}
-            onChange={handleInputChange}
-          />
-          <span role="img" aria-label="Canada Flag">
-            🇨🇦
-          </span>{" "}
-          I'm shipping from Canada
-        </label>
-      </div>
-    </div>
 
-    {/* City and Postal Code Section */}
-    <div style={styles.inputGroup}>
-      <label style={styles.inputLabel}></label>
-      <textarea
-        name="CityPostalCode"
-        placeholder="Enter city and postal code"
-        value={formData.CityPostalCode || ""}
-        onChange={handleInputChange}
-        style={styles.textarea}
-      ></textarea>
-    </div>
+            {formData.Equipment === "Dry Van" && (
+              <div style={styles.dryVanContainer}>
 
-    {/* Info Box */}
-    <div style={styles.infoBox}>
-      <span role="img" aria-label="Info Icon">
-        🏢
-      </span>{" "}
-      Truckload pickup location must be a business with a loading dock or
-      have a way to load the truck without a liftgate.
-    </div>
-  </>
-)}
+                <label style={styles.dryVanLabel}>Item Description *</label>
+                <input
+                  type="text"
+                  name="ItemDescription"
+                  placeholder="Enter item description"
+                  value={formData.ItemDescription || ""}
+                  onChange={handleInputChange}
+                  style={styles.dryVanInput}
+                />
+
+                <label style={styles.dryVanLabel}>Packaging Type *</label>
+                <select
+                  name="PackagingType"
+                  value={formData.PackagingType || ""}
+                  onChange={handleInputChange3}
+                  style={styles.dryVanDropdown}
+                >
+                  <option value="">Select packaging type</option>
+                  <option value="Pallet(48x40)">Pallet(48"x40")</option>
+                  <option value="Pallet(48x48)">Pallet(48"x48")</option>
+                  <option value="Pallet(Custom Dimensions)">Pallet(Custom Dimensions)</option>
+                  <option value="Box">Box</option>
+                  <option value="Crate">Crate</option>
+                  <option value="Bundle">Bundle</option>
+                  <option value="Drum">Drum</option>
+                  <option value="Roll">Roll</option>
+                  <option value="Bale">Bale</option>
+                </select>
+
+                {/* Render additional form fields for various Packaging Types */}
+                {(
+                  formData.PackagingType === "Box" ||
+                  formData.PackagingType === "Crate" ||
+                  formData.PackagingType === "Bundle" ||
+                  formData.PackagingType === "Drum" ||
+                  formData.PackagingType === "Roll" ||
+                  formData.PackagingType === "Bale" ||
+                  formData.PackagingType === "Pallet(48x40)" ||
+                  formData.PackagingType === "Pallet(48x48)" ||
+                  formData.PackagingType === "Pallet(Custom Dimensions)"
+                ) && (
+                    <div style={styles.palletForm}>
+                      {/* Length for Pallet/Box/Crate/Bundle/Drum */}
+                      <label style={styles.dryVanLabel}>Length *</label>
+                      <input
+                        type="number"
+                        name="Length"
+                        placeholder="Enter length in inches"
+                        value={formData.Length || ""}
+                        onChange={handleInputChange3}
+                        style={styles.dryVanInput}
+                      />
+
+                      {/* Width for Pallet/Box/Crate/Bundle/Drum */}
+                      <label style={styles.dryVanLabel}>Width *</label>
+                      <input
+                        type="number"
+                        name="Width"
+                        placeholder="Enter width in inches"
+                        value={formData.Width || ""}
+                        onChange={handleInputChange3}
+                        style={styles.dryVanInput}
+                      />
+
+                      {/* Height for Pallet/Box/Crate/Bundle/Drum */}
+                      <label style={styles.dryVanLabel}>Height *</label>
+                      <input
+                        type="number"
+                        name="Height"
+                        placeholder="Enter height in inches"
+                        value={formData.Height || ""}
+                        onChange={handleInputChange3}
+                        style={styles.dryVanInput}
+                      />
+
+                      {/* Weight of 1 Pallet/Box/Crate/Bundle/Drum */}
+                      <label style={styles.dryVanLabel}>Weight of 1 {formData.PackagingType} *</label>
+                      <input
+                        type="number"
+                        name="Weight"
+                        placeholder="Enter weight in pounds"
+                        value={formData.Weight || ""}
+                        onChange={handleInputChange3}
+                        style={styles.dryVanInput}
+                      />
+
+                      {/* Number of Pallets/Boxes/Crates/Bundle/Drum */}
+                      <label style={styles.dryVanLabel}>Number of {formData.PackagingType}s *</label>
+                      <input
+                        type="number"
+                        name="NumPallets"
+                        placeholder="Enter number"
+                        value={formData.NumPallets || ""}
+                        onChange={handleInputChange3}
+                        style={styles.dryVanInput}
+                      />
+
+                      {/* Display total shipment weight */}
+                      <div style={styles.totalWeight}>
+                        Total shipment weight:{" "}
+                        {formData.Weight && formData.NumPallets
+                          ? formData.Weight * formData.NumPallets
+                          : 0}{" "}
+                        pounds
+                      </div>
+                    </div>
+                  )}
+
+
+
+                <div style={styles.dryVanRadioGroup}>
+                  <label style={styles.dryVanRadioOption}>
+                    <input
+                      type="radio"
+                      name="ItemCondition"
+                      value="New"
+                      checked={formData.ItemCondition === "New"}
+                      onChange={handleInputChange}
+                    />
+                    New
+                  </label>
+                  <label style={styles.dryVanRadioOption}>
+                    <input
+                      type="radio"
+                      name="ItemCondition"
+                      value="Used"
+                      checked={formData.ItemCondition === "Used"}
+                      onChange={handleInputChange}
+                    />
+                    Used
+                  </label>
+                </div>
+
+                {/* Button to add a new item */}
+                <button
+  type="button"
+  onClick={handleAddAnotherItem}
+  style={{
+    ...styles.addItemButton,
+    backgroundColor: formData.ItemDescription &&
+      formData.PackagingType &&
+      formData.ItemCondition
+      ? "black"
+      : "grey",
+    cursor: formData.ItemDescription &&
+      formData.PackagingType &&
+      formData.ItemCondition
+      ? "pointer"
+      : "not-allowed",
+  }}
+  disabled={
+    !(
+      formData.ItemDescription &&
+      formData.PackagingType &&
+      formData.ItemCondition
+    )
+  }
+>
+  {editIndex !== null ? "Save Changes" : "+ Add Another Item"}
+</button>
+
+
+                {/* Display Added Items with Edit and Remove Buttons */}
+                {formData.items.length > 0 && (
+                  <div style={styles.itemList}>
+                    <h4>Added Items:</h4>
+                    {formData.items.map((item, index) => (
+                      <div key={index} style={styles.item}>
+                        {item.ItemDescription} - {item.PackagingType} - {item.ItemCondition}
+                        <button
+                          style={styles.editButton}
+                          onClick={() => handleEditItem(index)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          style={styles.removeButton}
+                          onClick={() => handleRemoveItem(index)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+
+
+              </div>
+            )}
 
 
             {/* Other Conditional Fields */}
@@ -319,8 +632,7 @@ function FullTruckloadForm() {
                     ...styles.inputLabel,
                     ...(isLabelFocused("Tarps") ? styles.labelFocused : {}),
                   }}
-                >
-                </label>
+                ></label>
                 <select
                   name="Tarps"
                   value={formData.Tarps || ""}
@@ -397,7 +709,6 @@ function FullTruckloadForm() {
             </div>
           </>
         )}
-
 
         {currentStep === 5 && (
           <>
@@ -621,7 +932,9 @@ function FullTruckloadForm() {
               }}
               onClick={() => {
                 if (!isTermsChecked) {
-                  setError("You must agree to the terms and conditions to proceed.");
+                  setError(
+                    "You must agree to the terms and conditions to proceed."
+                  );
                 } else {
                   setError(""); // Clear error message
                   alert("Form Submitted!"); // Form submission logic
@@ -631,7 +944,6 @@ function FullTruckloadForm() {
             >
               Submit
             </button>
-
           </>
         )}
       </form>
@@ -647,7 +959,6 @@ const styles = {
     maxWidth: "500px",
     height: "calc(100vh - 20px)", // Adjust for padding
     margin: "0 auto",
-    overflow: "hidden", // Prevent scrolling
     boxSizing: "border-box", // Ensure padding is included in the height calculation
   },
 
@@ -656,12 +967,14 @@ const styles = {
     alignItems: "center",
     marginBottom: "30px",
   },
+
   backButtonStyle: {
     background: "none",
     border: "none",
     fontSize: "24px",
     cursor: "pointer",
   },
+
   headerTitleStyle: {
     flexGrow: 1,
     textAlign: "center",
@@ -719,21 +1032,22 @@ const styles = {
   },
   inputLabel: {
     position: "absolute",
-    top: "10px",
+    top: "12px",
     left: "12px",
     fontSize: "16px",
     color: "#aaa",
     transition: "all 0.3s ease",
   },
   labelFocused: {
-    top: "1px",
+    top: "2px",
     fontSize: "12px",
     color: "#555",
   },
 
   input: {
-    width: "90%",
-    padding: "12px",
+    width: "100%",
+    fontSize: "16px",
+    padding: "15px",
     borderRadius: "5px",
     border: "1px solid #ccc",
   },
@@ -787,8 +1101,8 @@ const styles = {
   },
 
   dropdown: {
-    width: "95.5%",
-    padding: "12px",
+    width: "100%",
+    padding: "15px",
     borderRadius: "5px",
     border: "1px solid #ccc",
     fontSize: "16px",
@@ -849,7 +1163,106 @@ const styles = {
     fontSize: "16px",
     color: "black",
   },
-  
+
+
+  dryVanLabel: {
+    fontSize: "16px",
+    color: "black",
+    marginBottom: "5px",
+    marginTop: "5px",
+    display: "block", // Ensures label is on its own line
+  },
+
+  dryVanInput: {
+    width: "100%",
+    padding: "15px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    fontSize: "16px",
+    marginBottom: "10px", // Space between inputs
+    boxSizing: "border-box",
+  },
+
+  dryVanDropdown: {
+    width: "100%",
+    padding: "15px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    fontSize: "16px",
+
+    backgroundColor: "#fff",
+    marginBottom: "15px", // Space between dropdown and other fields
+  },
+
+  dryVanRadioGroup: {
+    display: "flex",
+    flexDirection: "row",
+    gap: "15px",
+    marginBottom: "15px", // Space between radio buttons and other fields
+  },
+
+  dryVanRadioOption: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "16px",
+    gap: "5px",
+  },
+
+  addItemButton: {
+    backgroundColor: "black", // Blue button
+    color: "#fff",
+    padding: "10px 15px",
+    border: "none",
+    borderRadius: "5px",
+    fontSize: "16px",
+    cursor: "pointer",
+    marginTop: "1px",
+    marginBottom: "15px",
+    transition: "background-color 0.3s", // Smooth transition
+  },
+  addItemButtonHover: {
+    backgroundColor: "#0056b3", // Darker blue on hover
+  },
+
+  // Display items
+  itemList: {
+    padding: "10px",
+    backgroundColor: "white",
+  },
+  item: {
+    marginBottom: "15px",
+    fontSize: "16px",
+    color: "#333",
+  },
+
+  totalWeight: {
+    marginTop: "10px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    color: "#333",
+  },
+
+  editButton: {
+    backgroundColor: "black",
+    color: "#fff",
+    padding: "5px 10px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginLeft: "10px"
+  },
+  removeButton: {
+    backgroundColor: "black",
+    color: "#fff",
+    padding: "5px 10px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginLeft: "10px"
+  },
+
+
+
   accordion: {
     marginTop: "10px",
   },
@@ -928,6 +1341,28 @@ const styles = {
   button1Disabled: {
     backgroundColor: "#d3d3d3", // Greyed out when disabled
     cursor: "not-allowed", // Shows disabled cursor
+  },
+  suggestionsList: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    width: "100%",
+    background: "white",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    zIndex: 10,
+    maxHeight: "150px",
+    overflowY: "auto",
+  },
+  suggestionItem: {
+    padding: "0.5rem",
+    cursor: "pointer",
+  },
+
+  flagImage: {
+    width: "20px", // Adjust width as needed
+    height: "auto", // Keep the aspect ratio intact
+    marginRight: "8px", // Optional: adds some space between the flag and the text
   },
 };
 
