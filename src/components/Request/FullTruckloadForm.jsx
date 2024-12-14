@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { FaArrowLeft, FaCheck, FaMinus, FaPlus, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // React Router hook
-import canadaFlag from './../../assets/pngegg.png'
 
 function FullTruckloadForm() {
   const [formData, setFormData] = useState({
@@ -40,6 +39,7 @@ function FullTruckloadForm() {
     CityPostalCode: "",
   });
 
+  
   const navigate = useNavigate(); // Initialize navigate function
 
 
@@ -1221,17 +1221,13 @@ const styles = {
     marginBottom: "15px",
     transition: "background-color 0.3s", // Smooth transition
   },
+
   addItemButtonHover: {
     backgroundColor: "#0056b3", // Darker blue on hover
   },
 
-  // Display items
-  itemList: {
-    padding: "10px",
-    backgroundColor: "white",
-  },
   item: {
-    marginBottom: "15px",
+    marginBottom: "18px",
     fontSize: "16px",
     color: "#333",
   },
@@ -1244,32 +1240,34 @@ const styles = {
   },
 
   editButton: {
-    backgroundColor: "black",
+    backgroundColor: "#5C5CFF",
     color: "#fff",
     padding: "5px 10px",
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-    marginLeft: "10px"
-  },
-  removeButton: {
-    backgroundColor: "black",
-    color: "#fff",
-    padding: "5px 10px",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginLeft: "10px"
+    marginLeft: "200px"
   },
 
+  removeButton: {
+    backgroundColor: "#FF5C5C",
+    color: "#fff",
+    padding: "5px 10px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginLeft: "15px"
+  },
 
 
   accordion: {
     marginTop: "10px",
   },
+
   accordionItem: {
     marginBottom: "10px",
   },
+
   accordionHeader: {
     backgroundColor: "#f1f1f1",
     padding: "10px",
@@ -1343,6 +1341,7 @@ const styles = {
     backgroundColor: "#d3d3d3", // Greyed out when disabled
     cursor: "not-allowed", // Shows disabled cursor
   },
+
   suggestionsList: {
     position: "absolute",
     top: "100%",
@@ -1360,11 +1359,6 @@ const styles = {
     cursor: "pointer",
   },
 
-  flagImage: {
-    width: "20px", // Adjust width as needed
-    height: "auto", // Keep the aspect ratio intact
-    marginRight: "8px", // Optional: adds some space between the flag and the text
-  },
 };
 
 export default FullTruckloadForm;
